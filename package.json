@@ -1,0 +1,65 @@
+{
+  "name": "mountain-displaypad",
+  "version": "1.0.0",
+  "description": "An npm module for interfacing with the Mountain Displaypad buttons",
+  "main": "index.js",
+  "typings": "index.d.ts",
+  "dependencies": {
+    "node-hid": "^2.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeLuF/mountain-displaypad.git"
+  },
+  "keywords": [
+    "mountain",
+    "displaypad",
+    "hid",
+    "usb",
+    "hardware",
+    "interface",
+    "controller"
+  ],
+  "author": {
+    "name": "Håkon Nessjøen",
+    "email": "haakon@bitfocus.io"
+  },
+  "contributors": [
+    {
+      "name": "Alex Van Camp",
+      "email": "email@alexvan.camp",
+      "url": "https://alexvan.camp/",
+      "twitter": "vancamp"
+    },
+    {
+      "name": "Richard Fox",
+      "twitter": "ProbablePrime"
+    },
+    {
+      "name": "Chris Hanel",
+      "twitter": "chrishanel",
+      "email": "chrishanel@gmail.com",
+      "url": "http://www.chrishanel.com/"
+    },
+    {
+      "name": "Julian Waller",
+      "email": "git@julusian.co.uk"
+    },
+    {
+      "name": "Jens Frank",
+      "email": "jf@mormo.org"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JeLuF/mountain-displaypad/issues"
+  },
+  "homepage": "https://github.com/JeLuF/mountain-displaypad",
+  "files": [
+    "*.js",
+    "*.d.ts"
+  ],
+  "engines": {
+    "node": ">=12.20"
+  }
+}
