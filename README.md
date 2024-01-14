@@ -1,7 +1,9 @@
 # mountain-displaypad
 
 [`mountain-displaypad`](https://github.com/JeLuF/mountain-displaypad) is a Node.js library for interfacing
-with Mountain's [Displaypad](https://mountain.gg/keypads/displaypad/).
+with Mountain's 6×2 button [Displaypad](https://mountain.gg/keypads/displaypad/).
+
+![image](https://github.com/JeLuF/mountain-displaypad/assets/5852422/6c20e59b-cab3-47bf-bb3c-0fac6c54ff7f)
 
 > ❗ Please note that `imountain-displaypad` is NOT a standalone application. Instead, `mountain-displaypad` is a code library, which developers can use to make their own applications which interface with the Displaypad.
 
