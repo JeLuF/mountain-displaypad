@@ -13,6 +13,7 @@ This library is based on [`infinitton-idisplay`](https://github.com/bitfocus/nod
 
 ## Install
 
+TODO: Upload to npm!
 `$ npm install --save mountain-displaypad`
 
 ### Example
