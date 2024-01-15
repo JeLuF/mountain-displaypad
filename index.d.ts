@@ -18,7 +18,8 @@ declare class Displaypad extends EventEmitter {
     
     static get VENDOR_ID(): number;
     static get PRODUCT_IDS(): number[];
-           
+    
+    static async openAsync();
     constructor(devicePath: string);
 
     /**

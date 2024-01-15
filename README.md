@@ -5,7 +5,7 @@ with Mountain's 6×2 button [Displaypad](https://mountain.gg/keypads/displaypad/
 
 ![image](https://github.com/JeLuF/mountain-displaypad/assets/5852422/6c20e59b-cab3-47bf-bb3c-0fac6c54ff7f)
 
-> ❗ Please note that `imountain-displaypad` is NOT a standalone application. Instead, `mountain-displaypad` is a code library, which developers can use to make their own applications which interface with the Displaypad.
+> ❗ Please note that `mountain-displaypad` is NOT a standalone application. Instead, `mountain-displaypad` is a code library, which developers can use to make their own applications which interface with the Displaypad.
 
 ## References
 
@@ -42,4 +42,22 @@ for (let i = 0; i < Displaypad.ICON_SIZE; i++) {
 }
 
 pad.fillImage(9, image)
+```
+
+### Async example 
+```
+const Displaypad = require('./mountain-displaypad')
+
+async function main() {
+        pad = await Displaypad.openAsync()
+
+        pad.on('up', (key) => {console.log('Button up:', key)})
+        pad.on('down', (key) => {console.log('Button down:', key)})
+
+        pad.fillColor(0,255,0,0)
+        pad.fillColor(1,0,255,0)
+        pad.fillColor(2,0,0,255)
+}
+
+main()
 ```
