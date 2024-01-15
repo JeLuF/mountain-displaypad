@@ -1,6 +1,6 @@
 {
   "name": "mountain-displaypad",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "An npm module for interfacing with the Mountain Displaypad buttons",
   "main": "index.js",
   "typings": "index.d.ts",

@@ -121,9 +121,9 @@ class Displaypad extends EventEmitter {
 
 			this.display = new HID.HID(paths.display)
 			this.device  = new HID.HID(paths.device)
-		} else if (args.length == 2 && typeof args[1] === HID.HIDAsync && typeof args[2] === HID.HIDAsync) {
-			this.display = args[1]
-			this.device = args[2]
+		} else if (args.length == 2 && args[0] instanceof HID.HIDAsync && args[1] instanceof HID.HIDAsync) {
+			this.display = args[0]
+			this.device = args[1]
 		} else {
 			// Open via device path
 			throw new Error('Not yet implemented')
@@ -266,9 +266,7 @@ class Displaypad extends EventEmitter {
 			this._keyIsPressed(11, data[47] & 0x08);
 			this._keyIsPressed(12, data[47] & 0x10);
 		} else if (data[0] == 0x11) { // Response to init message
-			console.log('Init complete')
 			this.initializing = false
-			console.log('Queue length', this.queue.length)
 			if (this.queue.length > 0) {
 				this.#startPixelTransfer(this.queue[0].keyIndex)
 			}
