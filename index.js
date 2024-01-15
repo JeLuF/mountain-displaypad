@@ -101,7 +101,6 @@ class Displaypad extends EventEmitter {
 	}
 
 	static async openAsync() {
-		// Device path not provided, will then select any connected device.
 		const devices = await HID.devicesAsync();
 
 		const paths = findDevicePaths(devices)
@@ -126,6 +125,7 @@ class Displaypad extends EventEmitter {
 			this.display = args[1]
 			this.device = args[2]
 		} else {
+			// Open via device path
 			throw new Error('Not yet implemented')
 		}
 
@@ -141,7 +141,7 @@ class Displaypad extends EventEmitter {
 			this.emit('error', err);
 		});
 
-		this.device.write(Buffer.from(INIT_MSG, 'hex'))
+		this.#reset()
 	}
 
 	/**
@@ -160,7 +160,7 @@ class Displaypad extends EventEmitter {
 		Displaypad.checkRGBValue(b);
 
 		const pixel = Buffer.from([b, g, r]);
-		this._writePixelData(keyIndex, Buffer.alloc(PACKET_SIZE, pixel))
+		this.#writePixelData(keyIndex, Buffer.alloc(PACKET_SIZE, pixel))
 	}
 
 	/**
@@ -190,8 +190,7 @@ class Displaypad extends EventEmitter {
 				byteBuffer.writeUInt8(red,offset+2)
 			}
 		}
-		this._writePixelData(keyIndex, byteBuffer)
-
+		this.#writePixelData(keyIndex, byteBuffer)
 	}
 
 	/**
@@ -203,7 +202,7 @@ class Displaypad extends EventEmitter {
 	clearKey(keyIndex) {
 		Displaypad.checkValidKeyIndex(keyIndex);
 
-		this._writePixelData(keyIndex, Buffer.alloc(PACKET_SIZE))
+		this.#writePixelData(keyIndex, Buffer.alloc(PACKET_SIZE))
 	}
 
 	/**
@@ -214,7 +213,7 @@ class Displaypad extends EventEmitter {
 	clearAllKeys() {
 		const buffer = Buffer.alloc(PACKET_SIZE)
 		for (let keyIndex = 0; keyIndex < NUM_KEYS; keyIndex++) {
-			this._writePixelData(keyIndex, buffer)
+			this.#writePixelData(keyIndex, buffer)
 		}
 	}
 
@@ -266,11 +265,19 @@ class Displaypad extends EventEmitter {
 			this._keyIsPressed(10, data[47] & 0x04);
 			this._keyIsPressed(11, data[47] & 0x08);
 			this._keyIsPressed(12, data[47] & 0x10);
-		} else if (data[0] == 0x21) {
+		} else if (data[0] == 0x11) { // Response to init message
+			console.log('Init complete')
+			this.initializing = false
+			console.log('Queue length', this.queue.length)
+			if (this.queue.length > 0) {
+				this.#startPixelTransfer(this.queue[0].keyIndex)
+			}
+
+		} else if (data[0] == 0x21) { // Response to image transfer message
 			if (data[1] == 0x00 && data[2] == 0x00) {
 				// The displaypad echoes the IMG_MSG. After receiving the echo,
 				// the image can be transfered.
-				var request = this.queue.shift()
+				var request = this.queue[0]
 				var data = Buffer.concat([this.imageHeader, request.pixels])
 
 				for (let i=0; i < data.length; i+=1024) {
@@ -281,11 +288,19 @@ class Displaypad extends EventEmitter {
 				this.display.write(Buffer.concat([this.imageHeader, request.pixels]))
 			}
 			if (data[1] == 0x00 && data[2] == 0xff) {
+				// Image transfer completed
+				clearTimeout(this.timeout)
+				this.queue.shift()
 				if (this.queue.length != 0) {
-					this._startPixelTransfer(this.queue[0].keyIndex)
+					this.#startPixelTransfer(this.queue[0].keyIndex)
 				}
 			}
 		}
+	}
+
+	#reset() {
+		this.initializing = true
+		this.device.write(Buffer.from(INIT_MSG, 'hex'))
 	}
 
 	/**
@@ -296,14 +311,18 @@ class Displaypad extends EventEmitter {
 	 * @param {Buffer} buffer Image data for the button
 	 * @returns {undefined}
 	 */
-	_writePixelData(keyIndex, pixels) {
+	#writePixelData(keyIndex, pixels) {
 		this.queue.push({keyIndex:keyIndex, pixels:pixels})
-		if (this.queue.length == 1) {
-			this._startPixelTransfer(keyIndex)
+		if (this.queue.length == 1 && ! this.initializing) {
+			this.#startPixelTransfer(keyIndex)
 		}
 	}
 
-	_startPixelTransfer(keyIndex) {
+	#startPixelTransfer(keyIndex) {
+		// Sometimes the initialization doesn't succeed, even though it gets
+		// acknowledged. In this case, resetting the connection usually fixes
+		// the issue.
+		this.timeout = setTimeout(this.#reset.bind(this), 1000)
 		var data = Buffer.from(IMG_MSG, 'hex')
 		data[5] = keyIndex
 		this.device.write(data)
