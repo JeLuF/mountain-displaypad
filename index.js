@@ -21,6 +21,24 @@ const IMG_MSG  = '0021000000FF3d000065650000000000000000000000000000000000000000
 
 const NULLBYTE = Buffer.from([0x00])
 
+function findDevicePaths(devices) {
+	const connectedDisplaypads = devices.filter(device => {
+		return device.vendorId === VENDOR_ID && PRODUCT_IDS.indexOf(device.productId) !== -1;
+	});
+	if (!connectedDisplaypads.length) {
+		throw new Error('No Displaypads are connected.');
+	}
+
+	let displayPath = connectedDisplaypads.filter((device) => {
+		return device.interface==1
+	})[0].path
+
+	let devicePath = connectedDisplaypads.filter((device) => {
+		return device.interface==3
+	})[0].path
+	return {display: displayPath, device: devicePath}
+}
+
 class Displaypad extends EventEmitter {
 	/**
 	 * The pixel size of an icon written to the Displaypad key.
@@ -82,28 +100,31 @@ class Displaypad extends EventEmitter {
 		}
 	}
 
-	constructor(devicePath) {
+	static async openAsync() {
+		// Device path not provided, will then select any connected device.
+		const devices = await HID.devicesAsync();
+
+		const paths = findDevicePaths(devices)
+
+		var display = await HID.HIDAsync.open(paths.display)
+		var device  = await HID.HIDAsync.open(paths.device)
+
+		return new Displaypad(display, device)
+	}
+		
+	constructor(...args) {
 		super();
-		if (typeof devicePath === 'undefined') {
+		if (args.length == 0) {
 			// Device path not provided, will then select any connected device.
 			const devices = HID.devices();
-			const connectedDisplaypads = devices.filter(device => {
-				return device.vendorId === VENDOR_ID && PRODUCT_IDS.indexOf(device.productId) !== -1;
-			});
-			if (!connectedDisplaypads.length) {
-				throw new Error('No Displaypads are connected.');
-			}
 
-			let displayPath = connectedDisplaypads.filter((device) => {
-                                return device.interface==1
-                        })[0].path
+			const paths = findDevicePaths(devices)
 
-			let devicePath = connectedDisplaypads.filter((device) => {
-                                return device.interface==3
-                        })[0].path
-
-			this.display = new HID.HID(displayPath)
-			this.device = new HID.HID(devicePath)
+			this.display = new HID.HID(paths.display)
+			this.device  = new HID.HID(paths.device)
+		} else if (args.length == 2 && typeof args[1] === HID.HIDAsync && typeof args[2] === HID.HIDAsync) {
+			this.display = args[1]
+			this.device = args[2]
 		} else {
 			throw new Error('Not yet implemented')
 		}
@@ -287,8 +308,6 @@ class Displaypad extends EventEmitter {
 		data[5] = keyIndex
 		this.device.write(data)
 	}
-		
-
 }
 
 module.exports = Displaypad;

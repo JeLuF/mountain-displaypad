@@ -5,7 +5,7 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "dependencies": {
-    "node-hid": "^2.1.1"
+    "node-hid": "^3.0.0"
   },
   "repository": {
     "type": "git",
